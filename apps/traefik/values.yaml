@@ -1,0 +1,19 @@
+aechrok:
+  traefik:
+    enabled: true
+
+traefik:
+  deployment:
+    enabled: true
+    replicas: 1
+
+  ingressClass:
+    enabled: true
+
+  ingressRoute:
+    dashboard:
+      enabled: true
+
+  providers:
+    kubernetesCRD:
+      enabled: true
