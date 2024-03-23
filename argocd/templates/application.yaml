@@ -41,7 +41,7 @@ spec:
     {{- else if $application.targetRevision }}
     targetRevision: {{ $application.targetRevision }}
     {{- else }}
-    targetRevision: master
+    targetRevision: main
     {{- end }}
     {{- if $application.helm }}
     helm:
