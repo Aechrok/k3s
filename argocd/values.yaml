@@ -71,7 +71,7 @@ appProjects:
       - "*"
 
 
-applications: []
+applications:
   sealed-secrets:
     targetClusterURL: https://kubernetes.default.svc
     namespace: kube-system
