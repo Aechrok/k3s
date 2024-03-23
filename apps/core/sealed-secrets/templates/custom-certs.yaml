@@ -1,0 +1,13 @@
+{{- if ((.Values.customCerts).enabled) -}}
+---
+apiVersion: v1
+data:
+  tls.crt: {{ required ".Values.customCerts.crt" .Values.customCerts.crt }}
+  tls.key: {{ required ".Values.customCerts.key" .Values.customCerts.key }}
+kind: Secret
+metadata:
+  name: sealed-secrets-controller-custom-certs
+  labels:
+    sealedsecrets.bitnami.com/sealed-secrets-key: active
+type: kubernetes.io/tls
+{{- end }}

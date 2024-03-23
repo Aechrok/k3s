@@ -1,0 +1,6 @@
+image: docker.io/bitnami/sealed-secrets-controller:v0.17.5
+hostNetwork: false
+affinity: {}
+tolerations: []
+customCerts:
+  enabled: false

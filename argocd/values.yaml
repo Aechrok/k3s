@@ -72,12 +72,10 @@ appProjects:
 
 
 applications: []
-  # nexus:
-  #   targetClusterURL: https://kubernetes.default.svc
-  #   namespace: nexus
-  #   project: home
-  #   path: apps/home/nexus
-  #   helm:
-  #     releaseName: nexus
-  #     valueFiles:
-  #       - values.yaml
+  sealed-secrets:
+    targetClusterURL: https://kubernetes.default.svc
+    namespace: kube-system
+    project: core
+    path: apps/core/sealed-secrets
+    helm:
+      releaseName: sealed-secrets
