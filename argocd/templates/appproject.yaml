@@ -1,0 +1,10 @@
+{{- range $name, $appProject := .Values.appProjects }}
+---
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: {{ $name }}
+  namespace: {{ $.Values.namespace }}
+spec:
+{{- tpl $appProject.spec (merge . $) | nindent 2 }}
+{{- end }}

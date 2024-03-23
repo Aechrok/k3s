@@ -1,0 +1,132 @@
+
+{{- range $name, $application := .Values.applications }}
+{{- if ne $application.enabled false -}}
+{{- if $application.overrideSpec }}
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: {{ $name }}
+  namespace: {{ $.Values.argocdInstanceNamespace }}
+spec:
+{{- tpl $application.overrideSpec (merge . $) | nindent 2 }}
+{{- else }}
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: {{ $name }}
+  namespace: {{ $.Values.argocdInstanceNamespace }}
+spec:
+  destination:
+    namespace: {{ $application.namespace }}
+    server: {{ $application.targetClusterURL }}
+  project: {{ $application.project }}
+  {{ if hasKey $application "sources" -}}
+  sources:
+  {{- toYaml $application.sources | nindent 4 }}
+    - repoURL: https://github.com/Aechrok/k3s.git
+      targetRevision: main
+      ref: values
+  {{- else -}}
+  source:
+    {{- if $application.path }}
+    path: {{ $application.path }}
+    {{- else }}
+    chart: {{ $name }}
+    {{- end }}
+    repoURL: {{ default $.Values.sourceRepo $application.repoURL }}
+    {{- if $.Values.overrideSourceBranches }}
+    targetRevision: {{ $.Values.overrideSourceBranches }}
+    {{- else if $application.targetRevision }}
+    targetRevision: {{ $application.targetRevision }}
+    {{- else }}
+    targetRevision: master
+    {{- end }}
+    {{- if $application.helm }}
+    helm:
+      {{- if $application.helm.releaseName }}
+      releaseName: {{ $application.helm.releaseName }}
+      {{- end }}
+      {{- if $application.helm.skipCrds }}
+      skipCrds: {{ $application.helm.skipCrds }}
+      {{- end }}
+      {{- if $application.helm.valueFiles }}
+      valueFiles:
+      {{- toYaml $application.helm.valueFiles | nindent 8 }}
+      {{- end }}
+      {{- if $application.helm.values }}
+      values: |
+        {{- toYaml $application.helm.values | nindent 8 -}}
+      {{- end }}
+      {{- if $application.helm.parameters }}
+      parameters:
+      {{- range $parameter := $application.helm.parameters }}
+      - name: {{ $parameter.name | quote }}
+        value: {{ $parameter.value | quote }}
+      {{- end }}
+      {{- end }}
+    {{- end }}
+    {{- if $application.directory }}
+    directory:
+      {{- toYaml $application.directory | nindent 6 }}
+    {{- end }}
+    {{- if $application.plugin }}
+    plugin:
+      {{- toYaml $application.plugin | nindent 6 }}
+    {{- end }}
+  {{- end }}
+  {{- if $application.ignoreDifferences }}
+  ignoreDifferences:
+  {{- toYaml $application.ignoreDifferences | nindent 4 }}
+  {{- end }}
+  syncPolicy:
+    {{- /* Ensure syncPolicy has the required options and any overrides */}}
+    {{- $key_indent := 4 }}
+    {{- $value_indent := 6 }}
+    {{- $sync_policy_overrides := $application.syncPolicy }}
+    {{- $sync_policy_required_options := $.Values.syncPolicy }}
+    {{- /* If there is no syncPolicy overrides, generate the required policy */}}
+    {{- if not $sync_policy_overrides }}
+        {{- toYaml $sync_policy_required_options | nindent $key_indent }}
+    {{- end}}
+
+    {{- with $sync_policy_overrides }}
+      {{- /* Loop through the policy overrides and combine with required options */}}
+      {{- range $policy_key, $policy_value := . }}
+        {{- /* Skip rendering top level keys where the value is null (kind = "invalid") */}}
+        {{- if eq (kindOf $policy_value) "invalid" }}{{- continue }}{{- end }}
+
+        {{- /* Try to smartly merge top level keys where the value is non-null */}}
+        {{- toYaml $policy_key | nindent $key_indent }}:
+        {{- if hasKey $sync_policy_required_options $policy_key }}
+          {{- if kindIs "slice" $policy_value }}
+            {{- /* Uniquely combine the list of policy override values with the required values */}}
+            {{- /* Note: arrays (lists) would be clobbered if the dictionaries were merged.
+            This was done to preserve the required list values for the top level key (eg. syncOptions) */}}
+            {{- toYaml (concat $policy_value (get $sync_policy_required_options $policy_key) | uniq | sortAlpha) | nindent $value_indent }}
+          {{- else if kindIs "map" $policy_value }}
+            {{- /* Merge the policy overides with the required options */}}
+            {{- /* Note: arrays are not merged, but clobbered by the overrides */}}
+            {{- toYaml (merge $policy_value (get $sync_policy_required_options $policy_key)) | nindent $value_indent }}
+          {{- else }}
+            {{- /* If not a list or dictionary, put back what was set (eg. "null" to explictly disable) */}}
+            {{- toYaml $policy_value | nindent $value_indent }}
+          {{- end }}
+        {{- else }}
+          {{- /* Add given policy override values */}}
+          {{- toYaml $policy_value | nindent $value_indent }}
+        {{- end }}
+      {{- end}}
+
+      {{- /* Loop through the required options and print if the not already printed */}}
+      {{- range $policy_key, $policy_value := $sync_policy_required_options }}
+          {{- if not (hasKey $sync_policy_overrides $policy_key) }}
+            {{- toYaml $policy_key | nindent $key_indent }}:
+            {{- toYaml $policy_value | nindent $value_indent }}
+          {{- end}}
+        {{- end}}
+    {{- end }}
+{{- end }}
+{{- end }}
+{{- end }}

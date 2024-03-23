@@ -1,0 +1,83 @@
+internalCluster:
+  ## internal cluster url
+  url: ""
+
+  ## flags to pass to selfManaged ArgoCD app resource which lives in the same internal cluster
+  selfManagedArgoCD:
+    ## enable a self managed argocd app yaml
+    enabled: false
+
+    ## value files to use when spinning up the argocd helm repo
+    valueFiles: []
+
+    ## branch to aim at for the argocd repo itself
+    argocdRepoBranch: ""
+
+    projectName: "home-cluster"
+
+    ## addtl helm parameters to pass to argocd helm repo
+    helmParameters:
+      appOfApps:
+        ## value passed to argocd helm repo which in turn spins up this repo itself in a loop
+        destinationClusterURL: ""
+        ## value passed to argocd helm repo which specifies branch to aim at for appofapps repo itself
+        repoBranch: ""
+        ## value of a github token in base64 encoding passed to argocd helm repo which gets used to auth apps housed in this repo (dev only, prd uses pre-made sealedsecret)
+        githubSecret64: ""
+        ## value files used to render this repo itself
+        valueFiles: []
+
+## source git repo url for applications housed in this repo
+sourceRepo: "https://github.com/Aechrok/k3s.git"
+
+## namespace where app yamls will be created
+argocdInstanceNamespace: "argocd"
+
+## override all application source branch/revisions
+overrideSourceBranches: ""
+
+## Default syncPolicy options that will be applied to all apps unless overridden.
+syncPolicy:
+  # NOTE: Do NOT set the `automated` option below! Enable in app overrides instead!
+  # The Argo CD auto sync setting (`automated`) should NOT be set below (globally)!
+  # Some apps should NOT have auto sync enabled and so this should NOT be enabled
+  # globally unless ALL such apps explicitly set `automated: null` to disable (i.e.
+  # override) it. Considerations such as progressive rollouts need to be evaluated
+  # and doesn't lend well to having auto sync enabled globally.
+  syncOptions:
+    - CreateNamespace=true
+
+
+appProjects:
+  core:
+    spec: |-
+      clusterResourceWhitelist:
+      - group: '*'
+        kind: '*'
+      destinations:
+      - namespace: '*'
+        server: '*'
+      sourceRepos:
+      - "*"
+  home:
+    spec: |-
+      clusterResourceWhitelist:
+      - group: '*'
+        kind: '*'
+      destinations:
+      - namespace: '*'
+        server: '*'
+      sourceRepos:
+      - "*"
+
+
+applications: []
+  # nexus:
+  #   targetClusterURL: https://kubernetes.default.svc
+  #   namespace: nexus
+  #   project: home
+  #   path: apps/home/nexus
+  #   helm:
+  #     releaseName: nexus
+  #     valueFiles:
+  #       - values.yaml

@@ -1,0 +1,5 @@
+apiVersion: v2
+name: argocd-appofapps
+description: This chart manages applications deployed by argocd
+type: application
+version: 2.0.0
