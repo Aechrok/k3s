@@ -70,6 +70,17 @@ appProjects:
       sourceRepos:
       - "*"
 
+  monitoring:
+    spec: |-
+      clusterResourceWhitelist:
+      - group: '*'
+        kind: '*'
+      destinations:
+      - namespace: '*'
+        server: '*'
+      sourceRepos:
+      - "*"
+
 
 applications:
   sealed-secrets:
@@ -79,3 +90,10 @@ applications:
     path: apps/core/sealed-secrets
     helm:
       releaseName: sealed-secrets
+  prometheus:
+    targetClusterURL: https://kubernetes.default.svc
+    namespace: monitoring
+    project: core
+    path: apps/monitoring/prometheus
+    helm:
+      releaseName: prometheus
