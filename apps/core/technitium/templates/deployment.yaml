@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: technitium
+  namespace: technitium
+spec:
+  selector:
+    matchLabels:
+      app: technitium
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: technitium
+    spec:
+      containers:
+        - name: technitium
+          image: technitium/dns-server:11.1.1
+          volumeMounts:
+            - name: technitium-volume
+              mountPath: /etc/dns
+      volumes:
+        - name: technitium-volume
+          persistentVolumeClaim:
+            claimName: technitium-pvc
