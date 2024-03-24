@@ -1,0 +1,5 @@
+apiVersion: v2
+name: grafana
+description: This chart manages Grafana to chart metrics
+type: application
+version: 2.0.0
