@@ -97,3 +97,10 @@ applications:
     path: apps/monitoring/prometheus
     helm:
       releaseName: prometheus
+  grafana:
+    targetClusterURL: https://kubernetes.default.svc
+    namespace: monitoring
+    project: core
+    path: apps/monitoring/grafana
+    helm:
+      releaseName: grafana
