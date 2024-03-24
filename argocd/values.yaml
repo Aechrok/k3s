@@ -104,3 +104,10 @@ applications:
     path: apps/monitoring/grafana
     helm:
       releaseName: grafana
+  technitium:
+    targetClusterURL: https://kubernetes.default.svc
+    namespace: technitium
+    project: core
+    path: apps/core/technitium
+    helm:
+      releaseName: technitium
