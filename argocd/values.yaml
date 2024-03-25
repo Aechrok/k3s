@@ -111,3 +111,10 @@ applications:
     path: apps/core/technitium
     helm:
       releaseName: technitium
+  teleport:
+    targetClusterURL: https://kubernetes.default.svc
+    namespace: teleport
+    project: core
+    path: apps/core/teleport
+    helm:
+      releaseName: teleport
